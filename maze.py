@@ -16,8 +16,8 @@ def growing_tree(width, height):
     while cells:
         nxt = randint(0, len(cells) - 1)
         x, y = cells[nxt]
-
         shuffle(directions)
+
         for direction in directions:
             dx, dy = x + DX[direction], y + DY[direction]
 
@@ -26,9 +26,8 @@ def growing_tree(width, height):
                 maze[dy][dx] |= OPPOSITE[direction]
                 cells.append([dx, dy])
                 nxt = None
-                break
 
-        if nxt:
+        if nxt is not None:
             cells.pop(nxt)
 
     return maze
