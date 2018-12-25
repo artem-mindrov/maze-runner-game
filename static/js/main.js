@@ -28,34 +28,36 @@ var maze = new Vue({
         case 38:
         case 87:
           this.move(Direction.N)
+          e.preventDefault()
           break
         case 40:
         case 98:
         case 83:
           this.move(Direction.S)
+          e.preventDefault()
           break
         case 100:
         case 37:
         case 65:
           this.move(Direction.W)
+          e.preventDefault()
           break
         case 102:
         case 39:
         case 68:
           this.move(Direction.E)
+          e.preventDefault()
           break
       }
-
-      e.preventDefault()
     },
 
     move: function(dir) {
-      if (this.player === undefined) return
+      if (this.player === undefined || this.player.moving) return
 
       const cell = this.grid[this.player.y][this.player.x]
 
       if (cell & dir) {
-        let dx = 0, dy = 0
+        let dx = 0, dy = 0, player = this.player
 
         switch (dir) {
           case Direction.N: dy = -1; break
@@ -64,11 +66,15 @@ var maze = new Vue({
           case Direction.W: dx = -1; break
         }
 
-        this.player.x += dx
-        this.player.y += dy
+        player.x += dx
+        player.y += dy
 
         const bsize = this.cellsize + this.wallwidth
-        this.player.chip.dmove(dx * bsize, dy * bsize)
+
+        player.moving = true
+        player.chip.animate(150).dmove(dx * bsize, dy * bsize).after((s) => {
+          player.moving = false
+        })
       }
     },
 
@@ -135,13 +141,13 @@ var maze = new Vue({
     draw_chip: function(x, y) {
       let th = this.wallwidth, bsize = this.cellsize + th
       return this.svg.circle(0.8 * this.cellsize).fill('blue').stroke('black').
-          attr({ cx: x * bsize + th + this.cellsize / 2, cy: y * bsize + th + this.cellsize / 2 })
+          attr({ cx: x * bsize + th + this.cellsize / 2, cy: y * bsize + th + this.cellsize / 2, class: 'player' })
     },
 
     draw_exit: function(x, y) {
       let th = this.wallwidth, bsize = this.cellsize + th
       this.svg.rect(this.cellsize * 0.8, this.cellsize * 0.8).fill('green').stroke('black').radius(this.cellsize / 8).
-          attr({ x: x * bsize + th + this.cellsize / 10, y: y * bsize + th + this.cellsize / 10 })
+          attr({ x: x * bsize + th + this.cellsize / 10, y: y * bsize + th + this.cellsize / 10, class: 'exit' })
     },
 
     start: function() {
