@@ -17,23 +17,23 @@ var maze = new Vue({
       let height = grid.length, width = grid[0].length
       let cellsize = Math.min(canvas.clientWidth / width, canvas.clientHeight / height)
 
-      if (cellsize > 60) { cellsize = 60 }
-      else if (cellsize < 30) { cellsize = 30 }
+      while (canvas.lastChild) {
+        canvas.removeChild(canvas.lastChild)
+      }
+
+      if (cellsize > 80) { cellsize = 80 }
+      else if (cellsize < 40) { cellsize = 40 }
 
       this.cellsize = cellsize
 
-      canvas.width = width * cellsize + th*(width + 1)
-      canvas.height = height * cellsize + th*(height + 1)
+      canvas.setAttribute('width', width * cellsize + th*(width + 2))
+      canvas.setAttribute('height', height * cellsize + th*(height + 2))
 
-      let xratio = canvas.width / canvas.clientWidth, yratio = canvas.height / canvas.clientHeight
+      let xratio = canvas.getAttribute('width') / canvas.clientWidth,
+          yratio = canvas.getAttribute('height') / canvas.clientHeight
       let minratio = Math.min(xratio, yratio)
 
       canvas.parentElement.style.width = Math.round(canvas.parentElement.clientWidth * minratio) + 'px'
-
-      let ctx = canvas.getContext("2d")
-      ctx.lineWidth = th
-      ctx.lineCap = 'round'
-      ctx.beginPath()
 
       for (var y = 0; y < height; y++) {
         for (var x = 0; x < width; x++) {
@@ -41,30 +41,62 @@ var maze = new Vue({
           let bordered_size = cellsize + th
 
           /* N, S, E, W = 1, 2, 4, 8 */
-          if (!(cell & 1)) {
-            ctx.moveTo(x * bordered_size + th/2, y * bordered_size + th/2)
-            ctx.lineTo((x + 1) * bordered_size + th/2, y * bordered_size + th/2)
+          if (y == 0 && !(cell & 1)) {
+            this.draw_wall(x, y, x + 1, y)
           }
 
           if (!(cell & 2)) {
-            ctx.moveTo(x * bordered_size + th/2, (y + 1) * bordered_size + th/2)
-            ctx.lineTo((x + 1) * bordered_size + th/2, (y + 1) * bordered_size + th/2)
+            this.draw_wall(x, y + 1, x + 1, y + 1)
           }
 
           if (!(cell & 4)) {
-            ctx.moveTo((x + 1) * bordered_size + th/2, y * bordered_size + th/2)
-            ctx.lineTo((x + 1) * bordered_size + th/2, (y + 1) * bordered_size + th/2)
+            this.draw_wall(x + 1, y, x + 1, y + 1)
           }
 
-          if (!(cell & 8)) {
-            ctx.moveTo(x * bordered_size + th/2, y * bordered_size + th/2)
-            ctx.lineTo(x * bordered_size + th/2, (y + 1) * bordered_size + th/2)
+          if (x == 0 && !(cell & 8)) {
+            this.draw_wall(x, y, x, y + 1)
           }
         }
       }
 
       this.grid = grid
-      ctx.stroke()
+    },
+
+    draw_wall: function(sx, sy, ex, ey) {
+      let wall = document.createElementNS('http://www.w3.org/2000/svg', 'line'),
+          th = this.wallwidth, bordered_size = this.cellsize + th
+      wall.setAttribute('x1', sx * bordered_size + th)
+      wall.setAttribute('y1', sy * bordered_size + th)
+      wall.setAttribute('x2', ex * bordered_size + th)
+      wall.setAttribute('y2', ey * bordered_size + th)
+      wall.setAttribute('stroke', 'black')
+      wall.setAttribute('stroke-width', th)
+      this.$el.appendChild(wall)
+    },
+
+    draw_chip: function(x, y) {
+      let canvas = this.$el, chip = document.createElementNS('http://www.w3.org/2000/svg', 'circle'),
+          th = this.wallwidth, bordered_size = this.cellsize + this.wallwidth
+      chip.setAttribute('cx', x * bordered_size + th + this.cellsize / 2)
+      chip.setAttribute('cy', y * bordered_size + th + this.cellsize / 2)
+      chip.setAttribute('r', 0.4 * this.cellsize)
+      chip.setAttribute('stroke', 'black')
+      chip.setAttribute('fill', 'blue')
+      this.$el.appendChild(chip)
+    },
+
+    draw_exit: function(x, y) {
+      let canvas = this.$el, chip = document.createElementNS('http://www.w3.org/2000/svg', 'rect'),
+          th = this.wallwidth, bordered_size = this.cellsize + this.wallwidth
+      chip.setAttribute('x', x * bordered_size + th + this.cellsize / 10)
+      chip.setAttribute('y', y * bordered_size + th + this.cellsize / 10)
+      chip.setAttribute('rx', this.cellsize / 8)
+      chip.setAttribute('ry', this.cellsize / 8)
+      chip.setAttribute('width', this.cellsize * 0.8)
+      chip.setAttribute('height', this.cellsize * 0.8)
+      chip.setAttribute('stroke', 'black')
+      chip.setAttribute('fill', 'green')
+      this.$el.appendChild(chip)
     },
 
     start: function() {
@@ -79,19 +111,8 @@ var maze = new Vue({
         case 3:  start[1] = grid.length - 1;    end[1] = 0; break
       }
 
-      let ctx = this.$el.getContext("2d"), cellsize = this.cellsize, th = this.wallwidth, bordered_size = cellsize + th
-
-      ctx.beginPath()
-      ctx.arc(start[0] * bordered_size + (bordered_size + th)/2, start[1] * bordered_size + (bordered_size + th)/2,
-        cellsize * 0.4, 0, Math.PI * 2, true)
-      ctx.fillStyle = 'blue'
-      ctx.fill()
-
-      ctx.beginPath()
-      ctx.arc(end[0] * bordered_size + (bordered_size + th)/2, end[1] * bordered_size + (bordered_size + th)/2,
-        cellsize * 0.4, 0, Math.PI * 2, true)
-      ctx.fillStyle = 'red'
-      ctx.fill()
+      this.draw_chip(...start)
+      this.draw_exit(...end)
     }
   }
 })
