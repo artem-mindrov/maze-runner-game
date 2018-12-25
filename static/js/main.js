@@ -1,4 +1,4 @@
-Vue.options.delimiters = ['[[', ']]'];
+Vue.options.delimiters = ['[[', ']]']
 
 var maze = new Vue({
   el: '#maze',
@@ -6,6 +6,9 @@ var maze = new Vue({
     grid: [],
     cellsize: 0,
     wallwidth: 1
+  },
+  mounted() {
+    this.svg = SVG.adopt(this.$el)
   },
   methods: {
     draw: function(grid) {
@@ -63,40 +66,22 @@ var maze = new Vue({
     },
 
     draw_wall: function(sx, sy, ex, ey) {
-      let wall = document.createElementNS('http://www.w3.org/2000/svg', 'line'),
-          th = this.wallwidth, bordered_size = this.cellsize + th
-      wall.setAttribute('x1', sx * bordered_size + th)
-      wall.setAttribute('y1', sy * bordered_size + th)
-      wall.setAttribute('x2', ex * bordered_size + th)
-      wall.setAttribute('y2', ey * bordered_size + th)
-      wall.setAttribute('stroke', 'black')
-      wall.setAttribute('stroke-width', th)
-      this.$el.appendChild(wall)
+      let th = this.wallwidth, bordered_size = this.cellsize + th
+      this.svg.line(sx * bordered_size + th, sy * bordered_size + th, ex * bordered_size + th, ey * bordered_size + th).
+          stroke({ color: 'black', width: th, linecap: 'round' })
     },
 
     draw_chip: function(x, y) {
-      let canvas = this.$el, chip = document.createElementNS('http://www.w3.org/2000/svg', 'circle'),
-          th = this.wallwidth, bordered_size = this.cellsize + this.wallwidth
-      chip.setAttribute('cx', x * bordered_size + th + this.cellsize / 2)
-      chip.setAttribute('cy', y * bordered_size + th + this.cellsize / 2)
-      chip.setAttribute('r', 0.4 * this.cellsize)
-      chip.setAttribute('stroke', 'black')
-      chip.setAttribute('fill', 'blue')
-      this.$el.appendChild(chip)
+      let th = this.wallwidth, bordered_size = this.cellsize + th
+      this.svg.circle(0.8 * this.cellsize).fill('blue').stroke('black').
+          attr({ cx: x * bordered_size + th + this.cellsize / 2, cy: y * bordered_size + th + this.cellsize / 2 })
+      return chip
     },
 
     draw_exit: function(x, y) {
-      let canvas = this.$el, chip = document.createElementNS('http://www.w3.org/2000/svg', 'rect'),
-          th = this.wallwidth, bordered_size = this.cellsize + this.wallwidth
-      chip.setAttribute('x', x * bordered_size + th + this.cellsize / 10)
-      chip.setAttribute('y', y * bordered_size + th + this.cellsize / 10)
-      chip.setAttribute('rx', this.cellsize / 8)
-      chip.setAttribute('ry', this.cellsize / 8)
-      chip.setAttribute('width', this.cellsize * 0.8)
-      chip.setAttribute('height', this.cellsize * 0.8)
-      chip.setAttribute('stroke', 'black')
-      chip.setAttribute('fill', 'green')
-      this.$el.appendChild(chip)
+      let th = this.wallwidth, bordered_size = this.cellsize + th
+      this.svg.rect(this.cellsize * 0.8, this.cellsize * 0.8).fill('green').stroke('black').radius(this.cellsize / 8).
+          attr({ x: x * bordered_size + th + this.cellsize / 10, y: y * bordered_size + th + this.cellsize / 10 })
     },
 
     start: function() {
@@ -111,7 +96,7 @@ var maze = new Vue({
         case 3:  start[1] = grid.length - 1;    end[1] = 0; break
       }
 
-      this.draw_chip(...start)
+      this.chip = this.draw_chip(...start)
       this.draw_exit(...end)
     }
   }
