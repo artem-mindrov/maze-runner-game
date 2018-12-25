@@ -1,5 +1,12 @@
 Vue.options.delimiters = ['[[', ']]']
 
+const Direction = Object.freeze({
+  N: 1,
+  S: 2,
+  E: 4,
+  W: 8
+})
+
 var maze = new Vue({
   el: '#maze',
   data: {
@@ -9,8 +16,62 @@ var maze = new Vue({
   },
   mounted() {
     this.svg = SVG.adopt(this.$el)
+
+    window.addEventListener('keydown', (e) => {
+      this.key_pressed(e)
+    })
   },
   methods: {
+    key_pressed: function(e) {
+      switch (e.keyCode) {
+        case 104:
+        case 38:
+        case 87:
+          this.move(Direction.N)
+          break
+        case 40:
+        case 98:
+        case 83:
+          this.move(Direction.S)
+          break
+        case 100:
+        case 37:
+        case 65:
+          this.move(Direction.W)
+          break
+        case 102:
+        case 39:
+        case 68:
+          this.move(Direction.E)
+          break
+      }
+
+      e.preventDefault()
+    },
+
+    move: function(dir) {
+      if (this.player === undefined) return
+
+      const cell = this.grid[this.player.y][this.player.x]
+
+      if (cell & dir) {
+        let dx = 0, dy = 0
+
+        switch (dir) {
+          case Direction.N: dy = -1; break
+          case Direction.S: dy = 1;  break
+          case Direction.E: dx = 1;  break
+          case Direction.W: dx = -1; break
+        }
+
+        this.player.x += dx
+        this.player.y += dy
+
+        const bsize = this.cellsize + this.wallwidth
+        this.player.chip.dmove(dx * bsize, dy * bsize)
+      }
+    },
+
     draw: function(grid) {
       if (grid.length < 4) return
 
@@ -66,22 +127,21 @@ var maze = new Vue({
     },
 
     draw_wall: function(sx, sy, ex, ey) {
-      let th = this.wallwidth, bordered_size = this.cellsize + th
-      this.svg.line(sx * bordered_size + th, sy * bordered_size + th, ex * bordered_size + th, ey * bordered_size + th).
+      let th = this.wallwidth, bsize = this.cellsize + th
+      this.svg.line(sx * bsize + th, sy * bsize + th, ex * bsize + th, ey * bsize + th).
           stroke({ color: 'black', width: th, linecap: 'round' })
     },
 
     draw_chip: function(x, y) {
-      let th = this.wallwidth, bordered_size = this.cellsize + th
-      this.svg.circle(0.8 * this.cellsize).fill('blue').stroke('black').
-          attr({ cx: x * bordered_size + th + this.cellsize / 2, cy: y * bordered_size + th + this.cellsize / 2 })
-      return chip
+      let th = this.wallwidth, bsize = this.cellsize + th
+      return this.svg.circle(0.8 * this.cellsize).fill('blue').stroke('black').
+          attr({ cx: x * bsize + th + this.cellsize / 2, cy: y * bsize + th + this.cellsize / 2 })
     },
 
     draw_exit: function(x, y) {
-      let th = this.wallwidth, bordered_size = this.cellsize + th
+      let th = this.wallwidth, bsize = this.cellsize + th
       this.svg.rect(this.cellsize * 0.8, this.cellsize * 0.8).fill('green').stroke('black').radius(this.cellsize / 8).
-          attr({ x: x * bordered_size + th + this.cellsize / 10, y: y * bordered_size + th + this.cellsize / 10 })
+          attr({ x: x * bsize + th + this.cellsize / 10, y: y * bsize + th + this.cellsize / 10 })
     },
 
     start: function() {
@@ -96,7 +156,7 @@ var maze = new Vue({
         case 3:  start[1] = grid.length - 1;    end[1] = 0; break
       }
 
-      this.chip = this.draw_chip(...start)
+      this.player = { chip: this.draw_chip(...start), x: start[0], y: start[1] }
       this.draw_exit(...end)
     }
   }
@@ -109,19 +169,7 @@ var form = new Vue({
       width: 10,
       height: 10,
       loading: true,
-      submit_text: "",
-      rebuild() {
-        this.loading = true
-        this.submit_text = "<i class='fa fa-circle-o-notch fa-spin'></i> Building"
-
-        axios.get("/build", { params: { w: this.width, h: this.height } }).then(resp => {
-            maze.draw(resp.data)
-            maze.start()
-        }).finally(() => {
-            this.loading = false
-            this.submit_text = "Build"
-        })
-      }
+      submit_text: ""
     }
   },
   mounted() {
@@ -129,7 +177,16 @@ var form = new Vue({
   },
   methods: {
     rebuild: function() {
-      this.rebuild()
+      this.loading = true
+      this.submit_text = "<i class='fa fa-circle-o-notch fa-spin'></i> Building"
+
+      axios.get("/build", { params: { w: this.width, h: this.height } }).then(resp => {
+          maze.draw(resp.data)
+          maze.start()
+      }).finally(() => {
+          this.loading = false
+          this.submit_text = "Build"
+      })
     }
   }
 });
