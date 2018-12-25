@@ -2,3 +2,22 @@
     width: 100%;
     height: auto;
 }
+
+$radarColor: rgb(215,185,0);
+
+path.star {
+    animation: pulse 2.5s infinite;
+    -webkit-transform-origin: center center;
+    opacity: 1;
+}
+
+@keyframes pulse {
+  0% {
+      stroke-width: 1;
+      stroke: transparentize($radarColor, 25%);
+  }
+  100% {
+      stroke-width: 6;
+      stroke: transparentize($radarColor, 90%);
+  }
+}

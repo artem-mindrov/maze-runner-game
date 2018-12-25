@@ -138,16 +138,45 @@ var maze = new Vue({
           stroke({ color: 'black', width: th, linecap: 'round' })
     },
 
-    draw_chip: function(x, y) {
-      let th = this.wallwidth, bsize = this.cellsize + th
-      return this.svg.circle(0.8 * this.cellsize).fill('blue').stroke('black').
-          attr({ cx: x * bsize + th + this.cellsize / 2, cy: y * bsize + th + this.cellsize / 2, class: 'player' })
+    draw_player: function(x, y) {
+      let th = this.wallwidth, bsize = this.cellsize + th, r = 0.4 * this.cellsize,
+          cx = x * bsize + th + this.cellsize / 2, cy = y * bsize + th + this.cellsize / 2
+
+      let g = this.svg.group()
+      g.circle(2*r).fill('yellow').stroke('black').attr({ cx: cx, cy: cy, class: 'player', 'stroke-opacity': 0.6 })
+      g.circle(r/3).fill('black').attr({ cx: cx - r * 2/3, cy: cy, 'fill-opacity': 0.5 })
+      g.circle(r/3).fill('black').attr({ cx: cx + r * 2/3, cy: cy, 'fill-opacity': 0.5 })
+
+      let points = [ `M${cx - r/3},${cy + r/4}`, `Q${cx},${cy + r*3/4}`, `${cx + r/3},${cy + r/4}`]
+      g.path(points.join(' ')).fill('black').attr({ 'fill-opacity': 0.5 })
+      return g
     },
 
     draw_exit: function(x, y) {
       let th = this.wallwidth, bsize = this.cellsize + th
-      this.svg.rect(this.cellsize * 0.8, this.cellsize * 0.8).fill('green').stroke('black').radius(this.cellsize / 8).
-          attr({ x: x * bsize + th + this.cellsize / 10, y: y * bsize + th + this.cellsize / 10, class: 'exit' })
+
+      // https://css-tricks.com/creating-star-heart-animation-svg-vanilla-javascript/
+      // https://codepen.io/thebabydino/pen/YrdwmX
+      const P = 5, RCO = this.cellsize / 2
+           BAS = 2*(2*Math.PI/P)
+           BAC = 2*Math.PI/P
+           RI = RCO*Math.cos(.5*BAS)
+           RCI = RI/Math.cos(.5*BAC)
+           ND = 2*P
+           BAD = 2*Math.PI/ND
+           PTS = []
+
+      for (let i = 0; i < ND; i++) {
+  	    let cr = i%2 ? RCI : RCO, ca = i*BAD,
+            px = Math.round(cr*Math.cos(ca)) + x * bsize + th + this.cellsize / 2,
+            py = Math.round(cr*Math.sin(ca)) + y * bsize + th + this.cellsize / 2
+
+  		PTS.push([px, py])
+  		if (!(i%2)) PTS.push([px, py])
+      }
+
+      path = PTS.reduce((a, c, i) => { return a + (i%3 ? ' ' : 'C') + c }, `M${PTS[PTS.length - 1]}`)
+  	  this.svg.path(path).stroke('rgb(215,185,0)').fill('gold').attr({ class: 'star' })
     },
 
     start: function() {
@@ -162,7 +191,7 @@ var maze = new Vue({
         case 3:  start[1] = grid.length - 1;    end[1] = 0; break
       }
 
-      this.player = { chip: this.draw_chip(...start), x: start[0], y: start[1] }
+      this.player = { chip: this.draw_player(...start), x: start[0], y: start[1] }
       this.draw_exit(...end)
     }
   }
