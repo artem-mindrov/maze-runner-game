@@ -7,6 +7,67 @@ const Direction = Object.freeze({
   W: 8
 })
 
+function pad(num, d) {
+  let zero = '';
+  for (let i = 0; i < d; i++) { zero += '0' }
+  return (zero + num).slice(-d)
+}
+
+var timer = new Vue({
+  el: '#timer',
+  data() {
+    return {
+      time: 'Stopped',
+      counter: 0,
+      finished: false
+    }
+  },
+  methods: {
+    start: function() {
+      if (this.timerID === undefined) {
+        const self = this
+        this.finished = false
+
+        fire = function() {
+          self.time = [pad(Math.floor(self.counter / 3600), 2), pad(Math.floor((self.counter % 3600) / 60), 2),
+                      pad(self.counter % 60, 2)].join(':')
+          self.counter++
+        }
+
+        fire()
+        this.timerID = setInterval(fire, 1000)
+      }
+    },
+    stop: function() {
+      this.time = 'Stopped'
+      this.finished = false
+
+      if (this.timerID !== undefined) {
+        this.timerID = window.clearInterval(this.timerID)
+        this.reset()
+      }
+    },
+    reset: function() { this.counter = 0 },
+    pause: function() {
+      if (this.timerID !== undefined) {
+        window.clearInterval(this.timerID)
+      }
+
+      this.time = 'Paused'
+    },
+    resume: function() { this.start() },
+    finish: function() {
+      if (!this.finished) {
+        this.finished = true
+
+        if (this.timerID !== undefined) {
+          window.clearInterval(this.timerID)
+        }
+      }
+    }
+  }
+})
+
 var maze = new Vue({
   el: '#maze',
   data: {
@@ -74,6 +135,12 @@ var maze = new Vue({
         player.moving = true
         player.chip.animate(150).dmove(dx * bsize, dy * bsize).after((s) => {
           player.moving = false
+
+          if (this.exit !== undefined) {
+            if (player.x == this.exit[0] && player.y == this.exit[1]) {
+              timer.finish()
+            }
+          }
         })
       }
     },
@@ -176,6 +243,7 @@ var maze = new Vue({
       }
 
       path = PTS.reduce((a, c, i) => { return a + (i%3 ? ' ' : 'C') + c }, `M${PTS[PTS.length - 1]}`)
+      this.exit = [x, y]
   	  this.svg.path(path).stroke('rgb(215,185,0)').fill('gold').attr({ class: 'star' })
     },
 
@@ -214,14 +282,16 @@ var form = new Vue({
     rebuild: function() {
       this.loading = true
       this.submit_text = "<i class='fa fa-circle-o-notch fa-spin'></i> Building"
+      timer.stop()
 
       axios.get("/build", { params: { w: this.width, h: this.height } }).then(resp => {
           maze.draw(resp.data)
           maze.start()
+          timer.start()
       }).finally(() => {
           this.loading = false
           this.submit_text = "Build"
       })
     }
   }
-});
+})

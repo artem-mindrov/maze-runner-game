@@ -12,6 +12,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
       <a id="test" class="navbar-brand" href="#">Maze Runner</a>
+
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -25,12 +26,21 @@
             <input type="number" v-model="width" min="4" max="40" aria-label="Width" class="form-control">
             <input type="number" v-model="height" min="4" max="40" aria-label="Height" class="form-control">
           </div>
+
           <button type="submit" class="btn btn-primary mb-2" :disabled="loading == true" v-html="submit_text"></button>
         </form>
       </div>
     </nav>
 
     <div class="container">
+      <div class="row">
+        <div class="col">
+          <div id="timer" class="mx-auto">
+            <p class="time text-center" v-bind:class="{'finished': finished == true}">[[ time ]]</p>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <div class="col">
           <div id="maze-container" class="mx-auto">

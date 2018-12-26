@@ -21,3 +21,36 @@ path.star {
       stroke: transparentize($radarColor, 90%);
   }
 }
+
+@keyframes text-pulse {
+  0% {
+      text-shadow: none;
+  }
+  75% {
+      text-shadow: 0 0 0.7em;
+  }
+  100% {
+      text-shadow: none;
+  }
+}
+
+@keyframes timer-finished {
+  100% {
+      color: gold;
+  }
+}
+
+#timer {
+  .time {
+    letter-spacing: 0.05em;
+    font-size: 1.3em;
+    color: darkgray;
+  }
+
+  .finished {
+    animation-name: text-pulse, timer-finished;
+    animation-duration: 2.5s, 2.5s;
+    animation-iteration-count: 1, 1;
+    animation-fill-mode: none, forwards;
+  }
+}
