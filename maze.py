@@ -30,6 +30,7 @@ def growing_tree(width, height, method='backtrack'):
                 maze[dy][dx] |= OPPOSITE[direction]
                 cells.append([dx, dy])
                 nxt = None
+                break
 
         if nxt is not None:
             cells.pop(nxt)
