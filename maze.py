@@ -1,7 +1,7 @@
 from random import randint, shuffle
 
 
-def growing_tree(width, height):
+def growing_tree(width, height, method='backtrack'):
     N, S, E, W = 1, 2, 4, 8
     DX = {E: 1, W: -1, N: 0, S: 0}
     DY = {E: 0, W: 0, N: -1, S: 1}
@@ -14,7 +14,11 @@ def growing_tree(width, height):
     cells.append([x, y])
 
     while cells:
-        nxt = randint(0, len(cells) - 1)
+        nxt = -1
+
+        if method == 'prim':
+            nxt = randint(0, len(cells) - 1)
+
         x, y = cells[nxt]
         shuffle(directions)
 
