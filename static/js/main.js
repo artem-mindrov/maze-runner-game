@@ -224,7 +224,7 @@ var maze = new Vue({
 
       // https://css-tricks.com/creating-star-heart-animation-svg-vanilla-javascript/
       // https://codepen.io/thebabydino/pen/YrdwmX
-      const P = 5, RCO = this.cellsize / 2
+      const P = 5, RCO = this.cellsize / 2 * 0.8
            BAS = 2*(2*Math.PI/P)
            BAC = 2*Math.PI/P
            RI = RCO*Math.cos(.5*BAS)

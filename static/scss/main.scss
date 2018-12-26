@@ -17,7 +17,7 @@ path.star {
       stroke: transparentize($radarColor, 25%);
   }
   100% {
-      stroke-width: 6;
+      stroke-width: 8;
       stroke: transparentize($radarColor, 90%);
   }
 }
