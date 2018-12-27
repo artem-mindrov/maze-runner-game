@@ -3,6 +3,14 @@
     height: auto;
 }
 
+#maze-form {
+    margin-top: 0.5em;
+}
+
+#errors {
+    margin-left: 2em;
+}
+
 $radarColor: rgb(215,185,0);
 
 path.star {

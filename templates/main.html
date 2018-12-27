@@ -28,6 +28,8 @@
           </div>
 
           <button type="submit" class="btn btn-primary mb-2" :disabled="loading == true" v-html="submit_text"></button>
+          <div id="errors" v-html="errors" role="alert"
+               v-bind:class="{'alert alert-danger alert-dismissible fade show': errors !== ''}"></div>
         </form>
       </div>
     </nav>

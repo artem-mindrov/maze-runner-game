@@ -272,7 +272,8 @@ var form = new Vue({
       width: 10,
       height: 10,
       loading: true,
-      submit_text: ""
+      submit_text: '',
+      errors: ''
     }
   },
   mounted() {
@@ -285,9 +286,25 @@ var form = new Vue({
       timer.stop()
 
       axios.get("/build", { params: { w: this.width, h: this.height } }).then(resp => {
+          this.errors = ''
           maze.draw(resp.data)
           maze.start()
           timer.start()
+      }).catch((err) => {
+          this.errors = '<b>Server Error: </b>'
+
+          if (err.response) {
+            this.errors += '[' + err.response.status + '] : '
+            this.errors += err.response.data
+          } else if (err.request) {
+            this.errors += err.request.statusText
+          } else {
+            this.errors += err.message
+          }
+
+          this.errors += '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'
+          this.errors += '<span aria-hidden="true">&times;</span>'
+          this.errors += '</button>'
       }).finally(() => {
           this.loading = false
           this.submit_text = "Build"
