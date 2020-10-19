@@ -1,0 +1,23 @@
+#word-container > .jumbotron {
+    font-size: 10em;
+    span:hover {
+        color: green;
+    }
+}
+
+#syllables {
+    & > li {
+        display: inline;
+        &:hover {
+            color: green;
+        }
+        &:after {
+            content: '-';
+        }
+        &:last-child {
+            &:after {
+                content: none;
+            }
+        }
+    }
+}

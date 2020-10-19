@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}Reading{% endblock %}
+{% block styles %}
+    {% assets "scss_reading" %}
+      <link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
+    {% endassets %}
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+      <a id="test" class="navbar-brand" href="/">Home</a>
+
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse">
+        <form id="reading-form" class="form-inline" v-on:change="populate">
+          <select name="choice" aria-label="Choice" class="form-control" v-model="choice">
+              <option value="3_1">3 letters</option>
+              <option value="4_2">4 letters, 2 syllables</option>
+              <option value="5_2">5 letters, 2 syllables</option>
+              <option value="x_3">3 syllables</option>
+          </select>
+        </form>
+      </div>
+    </nav>
+
+    <div class="container" id="word-container">
+      <div class="jumbotron text-center">
+          <ul id="syllables">
+              <li v-for="syllable in syllables">[[ syllable ]]</li>
+          </ul>
+      </div>
+      <div class="btn-group btn-block" role="group" aria-label="Basic example">
+        <a class="btn page-link" href="#" aria-label="Prev" v-on:click="prev" :class="{disabled: idx == 0}">
+          <span aria-hidden="true">&laquo;</span>
+          <span class="sr-only">Prev</span>
+        </a>
+        <a class="btn page-link" href="#" aria-label="Next" v-on:click="next" :class="{disabled: idx == words.length - 1}">
+          <span aria-hidden="true">&raquo;</span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+  {% assets "js_reading" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock %}
